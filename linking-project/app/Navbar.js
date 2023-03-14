@@ -1,12 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../utils/firebase';
 
 const Navbar = () => {
+  const [user, loading] = useAuthState(auth);
+
   const router = useRouter();
+  console.log(router);
+
+  const getPathname = usePathname();
+  console.log(getPathname);
 
   const isActive = (pathname) => {
-    return router.pathname === pathname ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white';
+    return getPathname === pathname ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white';
   };
 
   return (
@@ -26,15 +34,36 @@ const Navbar = () => {
             <div className="hidden absolute right-0 sm:block sm:ml-6">
               <div className="flex space-x-4">
                 <Link href="/about" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/about')}`}>About</Link>
-                <Link href="/contact" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/conatct')}`}>Contact</Link>
-                <Link href='/signup'>
-                  <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                    type="button"
-                  >
-                    Sign Up
-                  </button>
-                </Link>
+                <Link href="/contact" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/contact')}`}>Contact</Link>
+                <Link href="/test/api" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/test/api')}`}>Testing APIs</Link>
+                {!user && (
+                  <Link href='/auth/login'>
+                    <button
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                      type="button"
+                    >
+                      Login
+                    </button>
+                  </Link>
+                )}
+                {loading && (
+                  <div className='h-full flex items-center justify-center'>
+                    <p>Loading...</p>
+                  </div>
+                )}
+                {user && (
+                  <div className='w-full border-l-1 flex flex-row flex-1'>
+                    <Link href={'/dashboard/user'} className='border-l-2 flex flex-row flex-1 items-center justify-center'>
+                      <p className='text-sm ml-2 mr-2 text-white'>{user.displayName}</p>
+                      <img
+                        src={user.photoURL}
+                        alt="avatar"
+                        referrerPolicy='no-referrer'
+                        className='w-10 rounded-full'
+                      />
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>
